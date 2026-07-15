@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘의 귀여운 동물 일력</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="오늘의 귀여운 동물 일력">
+<meta property="og:description" content="매일매일 실제 강아지·고양이·쿼카·토끼 사진과 영상을 보여주는 웹 일력">
+<meta property="og:image" content="https://sue7143-art.github.io/animal-calender/preview.jpg">
+<meta property="og:url" content="https://sue7143-art.github.io/animal-calender/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="오늘의 귀여운 동물 일력">
+<meta name="twitter:description" content="매일매일 실제 강아지·고양이·쿼카·토끼 사진과 영상을 보여주는 웹 일력">
+<meta name="twitter:image" content="https://sue7143-art.github.io/animal-calender/preview.jpg">
+<style>
+  @font-face {
+    font-family: 'Cafe24Decoshadow';
+    src: url('fonts/Cafe24Decoshadow.ttf') format('truetype');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Cafe24MeongiW';
+    src: url('fonts/Cafe24MeongiW.otf') format('opentype');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'HSJandari';
+    src: url('fonts/HSJandari.ttf') format('truetype');
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'GangwonEduSaeeum';
+    src: url('fonts/GangwonEduSaeeum.ttf') format('truetype');
+    font-display: swap;
+  }
+  :root {
+    --bg: #fff3f6;
+    --pink: #ffb6cf;
+    --pink-deep: #ff8fb3;
+    --line: #ffd9e5;
+    --ink: #4a3f45;
+    --muted: #c78f9e;
+    --accent: #e0708f;
+    --card: #ffffff;
+    --paper: #fffdf8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'GangwonEduSaeeum', "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(var(--line) 2.5px, transparent 3px) 0 0 / 30px 30px,
+      radial-gradient(var(--line) 2.5px, transparent 3px) 15px 15px / 30px 30px,
+      var(--bg);
+    display: flex;
+    justify-content: center;
+    padding: 36px 16px 72px;
+  }
+  .app { width: 100%; max-width: 560px; }
+
+  .page-title {
+    text-align: center;
+    font-family: 'HSJandari', sans-serif;
+    font-size: 1.5rem;
+    margin: 0;
+    letter-spacing: 1px;
+  }
+
+  .calendar-page {
+    text-align: center;
+    padding: 4px 20px 8px;
+    margin-top: 2px;
+  }
+  .cal-date-line {
+    font-size: 1.2rem;
+    color: var(--ink);
+  }
+  .cal-ymd {
+    font-family: 'Cafe24Decoshadow', sans-serif;
+    letter-spacing: 1px;
+  }
+  .cal-weekday {
+    font-family: 'HSJandari', sans-serif;
+  }
+
+  .card {
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 30px;
+    padding: 16px;
+    margin-top: 22px;
+    box-shadow: 0 10px 24px rgba(255, 143, 179, 0.22);
+  }
+  .media-wrap {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #fff6f9;
+    border: 2px dashed var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .media-wrap img, .media-wrap video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .loader, .error {
+    font-size: 1.05rem;
+    color: var(--muted);
+    text-align: center;
+    padding: 12px;
+  }
+  .loader { animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 1; }
+  }
+  .label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+  }
+  #label {
+    font-family: 'HSJandari', sans-serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    background: #fff0f5;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 14px;
+  }
+  #label:empty { visibility: hidden; }
+  .label-row a { font-family: 'HSJandari', sans-serif; color: var(--muted); font-size: 0.95rem; text-decoration: underline; }
+  .actions { display: flex; justify-content: center; margin-top: 16px; }
+  button {
+    font-family: 'HSJandari', sans-serif;
+    font-size: 1.15rem;
+    padding: 12px 28px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(180deg, #ffa9c6, #ff8fb3);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #f07ba2;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+  }
+  button:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #f07ba2; }
+  button:active { transform: translateY(3px); box-shadow: 0 2px 0 #f07ba2; }
+  button:disabled { opacity: 0.55; cursor: default; transform: none; box-shadow: 0 5px 0 #f07ba2; }
+
+  .prefs {
+    margin-top: 22px;
+    background: var(--card);
+    border: 3px solid var(--line);
+    border-radius: 26px;
+    padding: 16px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .prefs span.title {
+    font-family: 'HSJandari', sans-serif;
+    font-size: 1.15rem;
+    color: var(--accent);
+    width: 100%;
+    margin-bottom: 4px;
+  }
+  .prefs label {
+    font-family: 'HSJandari', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 2px solid var(--line);
+    background: #fff6f9;
+    color: var(--muted);
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+  .prefs label:hover { transform: translateY(-1px); }
+  .prefs label.on {
+    background: var(--line);
+    border-color: var(--pink);
+    color: #d14f78;
+  }
+  .prefs input[type=checkbox] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .history { margin-top: 24px; }
+  .history h2 {
+    font-family: 'HSJandari', sans-serif;
+    font-size: 1.15rem;
+    color: var(--accent);
+    margin: 0 0 10px 6px;
+  }
+  .history-strip {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 6px 4px 12px;
+  }
+  /* tilted mini polaroids */
+  .history-item {
+    flex: 0 0 auto;
+    width: 74px;
+    height: 88px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 5px 5px 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    cursor: pointer;
+    position: relative;
+    transform: rotate(-2.5deg);
+    transition: transform 0.15s ease;
+  }
+  .history-item:nth-child(even) { transform: rotate(2.5deg); }
+  .history-item:hover { transform: rotate(0deg) scale(1.07); }
+  .history-item.active { outline: 3px solid var(--pink); }
+  .history-item img, .history-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+  }
+  .history-item .date-tag {
+    position: absolute;
+    bottom: 1px; left: 0; right: 0;
+    font-size: 0.68rem;
+    text-align: center;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <p class="page-title">오늘의 귀여운 동물 일력</p>
+
+    <header class="calendar-page">
+      <div class="cal-date-line">
+        <span class="cal-ymd" id="calYmd"></span> <span class="cal-weekday" id="calWeekday"></span>
+      </div>
+    </header>
+
+    <main class="card">
+      <div class="media-wrap" id="mediaWrap">
+        <div class="loader">불러오는 중…</div>
+      </div>
+      <div class="label-row">
+        <span id="label"></span>
+        <a id="sourceLink" href="#" target="_blank" rel="noopener">출처</a>
+      </div>
+      <div class="actions">
+        <button id="rerollBtn">다른 친구 보기</button>
+      </div>
+    </main>
+
+    <section class="prefs" id="prefs">
+      <span class="title">보고 싶은 친구 고르기</span>
+      <label><input type="checkbox" data-animal="dog" checked> 강아지</label>
+      <label><input type="checkbox" data-animal="cat" checked> 고양이</label>
+      <label><input type="checkbox" data-animal="fox" checked> 여우</label>
+      <label><input type="checkbox" data-animal="duck" checked> 오리</label>
+      <label><input type="checkbox" data-animal="quokka" checked> 쿼카</label>
+      <label><input type="checkbox" data-animal="chick" checked> 병아리</label>
+      <label><input type="checkbox" data-animal="rabbit" checked> 토끼</label>
+    </section>
+
+    <section class="history">
+      <h2>지난 며칠</h2>
+      <div class="history-strip" id="historyStrip"></div>
+    </section>
+  </div>
+
+<script>
+(function () {
+  const PROVIDERS = {
+    dog: { label: '오늘의 강아지', type: 'image', fetchData: fetchDogPhoto },
+    dogvideo: { label: '오늘의 강아지 영상', type: 'video', fetchData: fetchDogVideo },
+    cat: { label: '오늘의 고양이', type: 'image', fetchData: fetchCatPhoto },
+    catvideo: { label: '오늘의 고양이 영상', type: 'video', fetchData: fetchCatVideo },
+    fox: { label: '오늘의 여우', type: 'image', fetchData: fetchFoxPhoto },
+    foxvideo: { label: '오늘의 여우 영상', type: 'video', fetchData: fetchFoxVideo },
+    duck: { label: '오늘의 오리', type: 'image', fetchData: fetchDuckPhoto },
+    duckvideo: { label: '오늘의 오리 영상', type: 'video', fetchData: fetchDuckVideo },
+    quokka: { label: '오늘의 쿼카', type: 'image', fetchData: fetchQuokkaPhoto },
+    quokkavideo: { label: '오늘의 쿼카 영상', type: 'video', fetchData: fetchQuokkaVideo },
+    chick: { label: '오늘의 병아리', type: 'image', fetchData: fetchChickPhoto },
+    chickvideo: { label: '오늘의 병아리 영상', type: 'video', fetchData: fetchChickVideo },
+    rabbit: { label: '오늘의 토끼', type: 'image', fetchData: fetchRabbitPhoto },
+    // bunnies.io returns a real (non-AI) looping GIF clip, rendered like a photo but plays as motion
+    rabbitvideo: { label: '오늘의 토끼 영상', type: 'image', fetchData: fetchRabbitVideo },
+  };
+
+  const ANIMAL_GROUPS = {
+    dog: ['dog', 'dogvideo'],
+    cat: ['cat', 'catvideo'],
+    fox: ['fox', 'foxvideo'],
+    duck: ['duck', 'duckvideo'],
+    quokka: ['quokka', 'quokkavideo'],
+    chick: ['chick', 'chickvideo'],
+    rabbit: ['rabbit', 'rabbitvideo'],
+  };
+  const ANIMAL_KEYS = Object.keys(ANIMAL_GROUPS);
+
+  const CACHE_PREFIX = 'dailyAnimal:';
+  const HISTORY_KEY = 'dailyAnimalHistory';
+  const PREFS_KEY = 'dailyAnimalPrefs';
+  const MAX_HISTORY = 14;
+
+  const mediaWrap = document.getElementById('mediaWrap');
+  const label = document.getElementById('label');
+  const sourceLink = document.getElementById('sourceLink');
+  const calYmd = document.getElementById('calYmd');
+  const calWeekday = document.getElementById('calWeekday');
+  const rerollBtn = document.getElementById('rerollBtn');
+  const historyStrip = document.getElementById('historyStrip');
+  const prefsBox = document.getElementById('prefs');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function todayKey(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  function renderCalendarHeader(d) {
+    const weekdays = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+    calYmd.textContent = `${d.getFullYear()} / ${pad(d.getMonth() + 1)} / ${pad(d.getDate())} /`;
+    calWeekday.textContent = weekdays[d.getDay()];
+  }
+
+  async function fetchDogPhoto() {
+    const res = await fetch('https://api.thedogapi.com/v1/images/search');
+    const data = await res.json();
+    return { url: data[0].url, sourceUrl: 'https://thedogapi.com' };
+  }
+
+  async function fetchCatPhoto() {
+    const res = await fetch('https://api.thecatapi.com/v1/images/search');
+    const data = await res.json();
+    return { url: data[0].url, sourceUrl: 'https://thecatapi.com' };
+  }
+
+  // random.dog's `filter` query param doesn't reliably return only videos,
+  // so we fetch repeatedly and check the file extension ourselves.
+  async function fetchDogVideo() {
+    for (let i = 0; i < 10; i++) {
+      const res = await fetch('https://random.dog/woof.json');
+      const data = await res.json();
+      if (/\.(mp4|webm)$/i.test(data.url)) {
+        return { url: data.url, sourceUrl: 'https://random.dog' };
+      }
+    }
+    throw new Error('영상을 찾지 못했어요');
+  }
+
+  // Covers species with no dedicated free photo API (fox, duck, quokka, chick,
+  // rabbit) using real user-submitted media. Sorted by "top of the week" so
+  // results skew toward the most-upvoted (i.e. most "liked") posts rather than
+  // just whatever is newest.
+  async function fetchRedditMedia(subreddit, wantVideo) {
+    const res = await fetch(`https://www.reddit.com/r/${subreddit}/top.json?t=week&limit=50&raw_json=1`);
+    if (!res.ok) throw new Error('reddit request failed');
+    const data = await res.json();
+    const posts = ((data.data && data.data.children) || [])
+      .map((c) => c.data)
+      .filter((p) => p && !p.over_18 && !p.stickied);
+    const candidates = posts.filter((p) => {
+      if (wantVideo) {
+        return p.is_video && p.media && p.media.reddit_video && p.media.reddit_video.fallback_url;
+      }
+      return !p.is_video && (p.post_hint === 'image' || /\.(jpe?g|png)(\?.*)?$/i.test(p.url || ''));
+    });
+    if (!candidates.length) throw new Error('no matching reddit post found');
+    // Still pick randomly among the top pool so it's not the exact same post every time.
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    const url = wantVideo ? pick.media.reddit_video.fallback_url : pick.url;
+    return { url, sourceUrl: `https://reddit.com${pick.permalink}` };
+  }
+
+  async function fetchCatVideo() {
+    return fetchRedditMedia('catvideos', true);
+  }
+
+  async function fetchFoxPhoto() {
+    return fetchRedditMedia('foxes', false);
+  }
+
+  async function fetchFoxVideo() {
+    return fetchRedditMedia('foxes', true);
+  }
+
+  async function fetchDuckPhoto() {
+    return fetchRedditMedia('ducks', false);
+  }
+
+  async function fetchDuckVideo() {
+    return fetchRedditMedia('ducks', true);
+  }
+
+  async function fetchQuokkaPhoto() {
+    return fetchRedditMedia('quokkas', false);
+  }
+
+  async function fetchQuokkaVideo() {
+    return fetchRedditMedia('quokkas', true);
+  }
+
+  async function fetchChickPhoto() {
+    return fetchRedditMedia('chickens', false);
+  }
+
+  async function fetchChickVideo() {
+    return fetchRedditMedia('chickens', true);
+  }
+
+  async function fetchRabbitPhoto() {
+    return fetchRedditMedia('rabbits', false);
+  }
+
+  // bunnies.io is a long-running community API of real (not AI) looping bunny clips
+  async function fetchRabbitVideo() {
+    const res = await fetch('https://api.bunnies.io/v2/loop/random/?media=gif');
+    const data = await res.json();
+    const url = data.media && data.media.gif;
+    if (!url) throw new Error('no bunny gif found');
+    return { url, sourceUrl: data.source || 'https://bunnies.io' };
+  }
+
+  function shuffle(keys) {
+    const arr = keys.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function getEnabledProviders() {
+    const checkedAnimals = [...prefsBox.querySelectorAll('input[type=checkbox]:checked')]
+      .map((el) => el.dataset.animal);
+    const animals = checkedAnimals.length ? checkedAnimals : ANIMAL_KEYS;
+    return animals.flatMap((a) => ANIMAL_GROUPS[a] || []);
+  }
+
+  function loadPrefs() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}');
+      prefsBox.querySelectorAll('input[type=checkbox]').forEach((el) => {
+        if (el.dataset.animal in saved) el.checked = saved[el.dataset.animal];
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  function savePrefs() {
+    const prefs = {};
+    prefsBox.querySelectorAll('input[type=checkbox]').forEach((el) => {
+      prefs[el.dataset.animal] = el.checked;
+    });
+    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  }
+
+  async function pickRandomEntry() {
+    const enabled = getEnabledProviders();
+    const order = shuffle(enabled);
+    for (const key of order) {
+      const p = PROVIDERS[key];
+      try {
+        const data = await p.fetchData();
+        return {
+          provider: key,
+          type: p.type,
+          label: p.label,
+          url: data.url,
+          sourceUrl: data.sourceUrl,
+          date: todayKey(),
+        };
+      } catch (e) {
+        continue;
+      }
+    }
+    throw new Error('모든 소스에서 불러오기에 실패했어요.');
+  }
+
+  function renderMedia(entry) {
+    mediaWrap.innerHTML = '';
+    if (entry.type === 'video') {
+      const video = document.createElement('video');
+      video.src = entry.url;
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.controls = true;
+      mediaWrap.appendChild(video);
+    } else {
+      const img = document.createElement('img');
+      img.src = entry.url;
+      img.alt = entry.label;
+      mediaWrap.appendChild(img);
+    }
+    label.textContent = entry.label;
+    sourceLink.href = entry.sourceUrl;
+  }
+
+  function showLoading() {
+    mediaWrap.innerHTML = '<div class="loader">불러오는 중…</div>';
+  }
+
+  function showError(message) {
+    mediaWrap.innerHTML = `<div class="error">${message}<br>다른 친구 보기를 눌러 다시 시도해보세요.</div>`;
+  }
+
+  function readHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveToHistory(entry) {
+    let history = readHistory().filter((h) => h.date !== entry.date);
+    history.unshift(entry);
+    history = history.slice(0, MAX_HISTORY);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    return history;
+  }
+
+  function renderHistory(history, activeDate) {
+    historyStrip.innerHTML = '';
+    history.forEach((entry) => {
+      const item = document.createElement('div');
+      item.className = 'history-item' + (entry.date === activeDate ? ' active' : '');
+      const media = entry.type === 'video'
+        ? Object.assign(document.createElement('video'), { src: entry.url, muted: true })
+        : Object.assign(document.createElement('img'), { src: entry.url, alt: entry.label });
+      item.appendChild(media);
+      const tag = document.createElement('div');
+      tag.className = 'date-tag';
+      tag.textContent = entry.date.slice(5);
+      item.appendChild(tag);
+      item.addEventListener('click', () => renderMedia(entry));
+      historyStrip.appendChild(item);
+    });
+  }
+
+  async function loadToday(forceNew) {
+    const key = todayKey();
+    const cacheKey = CACHE_PREFIX + key;
+    renderCalendarHeader(new Date());
+
+    if (!forceNew) {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const entry = JSON.parse(cached);
+        renderMedia(entry);
+        renderHistory(readHistory(), key);
+        return;
+      }
+    }
+
+    showLoading();
+    rerollBtn.disabled = true;
+    try {
+      const entry = await pickRandomEntry();
+      localStorage.setItem(cacheKey, JSON.stringify(entry));
+      const history = saveToHistory(entry);
+      renderMedia(entry);
+      renderHistory(history, key);
+    } catch (e) {
+      showError(e.message || '문제가 발생했어요.');
+    } finally {
+      rerollBtn.disabled = false;
+    }
+  }
+
+  // The native checkboxes are visually hidden; each label is styled as a pill
+  // chip whose "on" class must mirror the checkbox state.
+  function syncChips() {
+    prefsBox.querySelectorAll('label').forEach((lb) => {
+      const input = lb.querySelector('input[type=checkbox]');
+      lb.classList.toggle('on', !!(input && input.checked));
+    });
+  }
+
+  rerollBtn.addEventListener('click', () => loadToday(true));
+  prefsBox.querySelectorAll('input[type=checkbox]').forEach((el) => {
+    el.addEventListener('change', () => { savePrefs(); syncChips(); });
+  });
+
+  loadPrefs();
+  syncChips();
+  loadToday(false);
+})();
+</script>
+</body>
+</html>
